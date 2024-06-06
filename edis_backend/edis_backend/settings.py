@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = bool(os.getenv("DEBUG"))
+DEBUG = os.getenv("DEBUG") == "True"
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
 
@@ -86,7 +86,7 @@ SIMPLE_JWT = {
     ),
 }
 
-EMAIL_USE_TLS = bool(os.getenv("EMAIL_USE_TLS"))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS") == "True"
 
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 
