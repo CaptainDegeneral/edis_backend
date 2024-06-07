@@ -16,10 +16,100 @@ from django.utils.encoding import (
 )
 
 import jwt
+import os
 
 from .serializers import *
 from .models import *
 from .utils import *
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+# class SignUpAPIView(generics.GenericAPIView):
+#     serializer_class = SignUpSerializer
+
+#     def post(self, request):
+#         serializer = self.serializer_class(data=request.data)
+
+#         try:
+#             serializer.is_valid(raise_exception=True)
+#             serializer.save()
+#             user_data = serializer.data
+
+#             user = User.objects.get(email=user_data["email"])
+#             token = RefreshToken.for_user(user).access_token
+#             scheme = "https" if request.is_secure() else "http"
+#             absolute_url = (
+#                 f"{scheme}://"
+#                 f"{get_current_site(request).domain}"
+#                 f"{reverse('verify-email')}?token={str(token)}"
+#             )
+
+#             email_data = {
+#                 "email_body": Util.get_verification_email_body(
+#                     user.first_name, absolute_url
+#                 ),
+#                 "email_subject": "Подтверждение регистрации на платформе EDIS",
+#                 "email_to": user.email,
+#             }
+
+#             Util.send_email(email_data)
+
+#             return Response(
+#                 {"success": True, "data": user_data}, status=status.HTTP_201_CREATED
+#             )
+#         except ValidationError as err:
+#             error_dict = {}
+#             if hasattr(err, "detail"):
+#                 for field, errors in err.detail.items():
+#                     error_dict[field] = errors[0] if errors else ""
+#             else:
+#                 error_dict["non_field_errors"] = str(err)
+
+#             return Response(
+#                 {"success": False, "error": error_dict},
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
+
+
+# class VerifyEmailAPIView(views.APIView):
+#     serializer_class = EmailVerificationSerializer
+
+#     def get(self, request):
+#         token = request.GET.get("token")
+#         try:
+#             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+#             user = User.objects.get(id=payload["user_id"])
+#             if not user.is_verified:
+#                 user.is_verified = True
+#                 user.save()
+#                 return Response(
+#                     {
+#                         "success": True,
+#                         "message": "Адрес электронной почты успешно подтвержден.",
+#                     },
+#                     status=status.HTTP_200_OK,
+#                 )
+#             else:
+#                 return Response(
+#                     {
+#                         "success": False,
+#                         "message": "Ссылка для подтверждения адреса электронной почты недействительна.",
+#                     },
+#                     status=status.HTTP_400_BAD_REQUEST,
+#                 )
+#         except jwt.ExpiredSignatureError as err:
+#             return Response(
+#                 {"success": False, "error": str(err)},
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
+#         except jwt.exceptions.DecodeError as err:
+#             return Response(
+#                 {"success": False, "error": str(err)},
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
 
 
 class SignUpAPIView(generics.GenericAPIView):
@@ -27,7 +117,6 @@ class SignUpAPIView(generics.GenericAPIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
-
         try:
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -35,12 +124,12 @@ class SignUpAPIView(generics.GenericAPIView):
 
             user = User.objects.get(email=user_data["email"])
             token = RefreshToken.for_user(user).access_token
-            scheme = "https" if request.is_secure() else "http"
-            absolute_url = (
-                f"{scheme}://"
-                f"{get_current_site(request).domain}"
-                f"{reverse('verify-email')}?token={str(token)}"
-            )
+
+            # Формирование ссылки на подтверждение почты на фронтенд-домене
+            frontend_url = os.getenv(
+                "FRONTEND_DOMAIN"
+            )  # Замените на ваш фронтенд-домен
+            absolute_url = f"{frontend_url}/verify-email?token={str(token)}"
 
             email_data = {
                 "email_body": Util.get_verification_email_body(
@@ -70,7 +159,6 @@ class SignUpAPIView(generics.GenericAPIView):
 
 
 class VerifyEmailAPIView(views.APIView):
-    serializer_class = EmailVerificationSerializer
 
     def get(self, request):
         token = request.GET.get("token")
@@ -91,7 +179,7 @@ class VerifyEmailAPIView(views.APIView):
                 return Response(
                     {
                         "success": False,
-                        "message": "Ссылка для подтверждения адреса электронной почты недействительна.",
+                        "message": "Ссылка для подтверждения адреса электронной почты недействительна.",
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
