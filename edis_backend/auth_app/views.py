@@ -125,10 +125,7 @@ class SignUpAPIView(generics.GenericAPIView):
             user = User.objects.get(email=user_data["email"])
             token = RefreshToken.for_user(user).access_token
 
-            # Формирование ссылки на подтверждение почты на фронтенд-домене
-            frontend_url = os.getenv(
-                "FRONTEND_DOMAIN"
-            )  # Замените на ваш фронтенд-домен
+            frontend_url = os.getenv("FRONTEND_DOMAIN")
             absolute_url = f"{frontend_url}/verify-email?token={str(token)}"
 
             email_data = {
