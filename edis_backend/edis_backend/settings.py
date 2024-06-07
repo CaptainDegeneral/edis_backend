@@ -13,6 +13,8 @@ DEBUG = os.getenv("DEBUG") == "True"
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(" ")
 
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS").split(" ")
+
 AUTH_USER_MODEL = "auth_app.User"
 
 INSTALLED_APPS = [
@@ -24,6 +26,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     #
     "rest_framework",
+    "corsheaders",
     #
     "auth_app.apps.AuthAppConfig",
     "refresher_app.apps.RefresherAppConfig",
@@ -32,6 +35,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
