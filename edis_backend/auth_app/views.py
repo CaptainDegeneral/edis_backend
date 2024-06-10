@@ -41,8 +41,7 @@ class SignUpAPIView(generics.GenericAPIView):
             token = RefreshToken.for_user(user).access_token
 
             frontend_url = os.getenv("FRONTEND_DOMAIN")
-            relative_url = reverse("verify-email")
-            absolute_url = f"{frontend_url}{relative_url}?token={str(token)}"
+            absolute_url = f"{frontend_url}/verify-email?token={str(token)}"
 
             email_data = {
                 "email_body": Util.get_verification_email_body(
@@ -162,10 +161,7 @@ class ResetPasswordAPIView(generics.GenericAPIView):
                 token = PasswordResetTokenGenerator().make_token(user)
 
                 frontend_url = os.getenv("FRONTEND_DOMAIN")
-                relative_url = reverse(
-                    "password-reset-confirm", kwargs={"uidb64": uidb64, "token": token}
-                )
-                absolute_url = f"{frontend_url}{relative_url}"
+                absolute_url = f"{frontend_url}/password-reset/{uidb64}/{token}/"
 
                 email_data = {
                     "email_body": Util.get_password_reset_email_body(
