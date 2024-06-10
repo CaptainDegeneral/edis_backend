@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "auth_app.apps.AuthAppConfig",
     "refresher_app.apps.RefresherAppConfig",
     "retraining_app.apps.RetrainingAppConfig",
+    "courses_app.apps.CoursesAppConfig",
 ]
 
 MIDDLEWARE = [
