@@ -159,12 +159,14 @@ class ResetPasswordAPIView(generics.GenericAPIView):
                 user = User.objects.get(email=email)
                 uidb64 = urlsafe_base64_encode(force_bytes(user.id))
                 token = PasswordResetTokenGenerator().make_token(user)
-                scheme = "https" if request.is_secure() else "http"
-                absolute_url = (
-                    f"{scheme}://"
-                    f"{get_current_site(request=request).domain}"
-                    f"{reverse('password-reset-confirm', kwargs={'uidb64': uidb64, 'token': token})}"
-                )
+                # scheme = "https" if request.is_secure() else "http"
+                # absolute_url = (
+                #     f"{scheme}://"
+                #     f"{get_current_site(request=request).domain}"
+                #     f"{reverse('password-reset-confirm', kwargs={'uidb64': uidb64, 'token': token})}"
+                # )
+                frontend_url = os.getenv("FRONTEND_DOMAIN")
+                absolute_url = f"{frontend_url}/password-reset/{uidb64}/{token}/"
                 email_data = {
                     "email_body": Util.get_password_reset_email_body(
                         user.first_name, absolute_url
