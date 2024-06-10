@@ -1,4 +1,4 @@
-from rest_framework import generics, status, views
+from rest_framework import generics, status, views, permissions
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
@@ -134,9 +134,31 @@ class SignInAPIView(generics.GenericAPIView):
 
 
 class SignOutAPIView(generics.GenericAPIView):
+    serializer_class = SignOutSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        pass
+        serializer = self.serializer_class(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(
+                {"success": True},
+                status=status.HTTP_200_OK,
+            )
+        except ValidationError as err:
+            error_dict = {}
+            if hasattr(err, "detail"):
+                for field, errors in err.detail.items():
+                    error_dict[field] = errors[0] if errors else ""
+            else:
+                error_dict["non_field_errors"] = str(err)
+
+            return Response(
+                {"success": False, "error": error_dict},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class ResetPasswordAPIView(generics.GenericAPIView):
