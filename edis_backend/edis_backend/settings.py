@@ -26,6 +26,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     #
     "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     #
     "auth_app.apps.AuthAppConfig",
@@ -83,11 +85,13 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": datetime.timedelta(
-        hours=int(os.getenv("ACCESS_TOKEN_LIFETIME"))
+        minutes=int(os.getenv("ACCESS_TOKEN_LIFETIME"))
     ),
     "REFRESH_TOKEN_LIFETIME": datetime.timedelta(
         days=int(os.getenv("REFRESH_TOKEN_LIFETIME"))
     ),
+    "ROTATE_REFRESH_TOKENS": os.getenv("ROTATE_REFRESH_TOKENS") == "True",
+    "BLACKLIST_AFTER_ROTATION": os.getenv("BLACKLIST_AFTER_ROTATION") == "True",
 }
 
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS") == "True"

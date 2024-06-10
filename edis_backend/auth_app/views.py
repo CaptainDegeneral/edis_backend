@@ -139,12 +139,6 @@ class SignOutAPIView(generics.GenericAPIView):
         pass
 
 
-class RefreshTokenAPIView(generics.GenericAPIView):
-
-    def post(self, request):
-        pass
-
-
 class ResetPasswordAPIView(generics.GenericAPIView):
     serializer_class = ResetPasswordEmailRequestSerializer
 
