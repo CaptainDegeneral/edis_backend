@@ -106,10 +106,11 @@ class SignInSerializer(serializers.ModelSerializer):
 
     email = serializers.EmailField(max_length=255, min_length=4)
     password = serializers.CharField(max_length=255, min_length=9, write_only=True)
+    is_staff = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
-        fields = ["email", "password"]
+        fields = ["email", "password", "is_staff"]
 
     def validate(self, attrs):
         """Проверяет входные данные перед входом в систему."""
@@ -140,6 +141,7 @@ class SignInSerializer(serializers.ModelSerializer):
         return {
             "id": user.id,
             "email": user.email,
+            "is_staff": user.is_staff,
             "tokens": user.tokens(),
         }
 
