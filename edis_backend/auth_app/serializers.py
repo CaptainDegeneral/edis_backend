@@ -222,3 +222,41 @@ class SignOutSerializer(serializers.Serializer):
             RefreshToken(self.token).blacklist()
         except TokenError:
             self.fail("invalid_token")
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
+    password = serializers.CharField(write_only=True, required=False)
+    is_staff = serializers.BooleanField(required=False)
+
+    class Meta:
+        model = User
+        fields = ("email", "first_name", "last_name", "password", "is_staff")
+
+    def validate_email(self, value):
+        user = self.context["request"].user
+        if User.objects.exclude(pk=user.pk).filter(email=value).exists():
+            raise serializers.ValidationError("This email is already in use.")
+        return value
+
+    def update(self, instance, validated_data):
+        instance.email = validated_data.get("email", instance.email)
+        instance.first_name = validated_data.get("first_name", instance.first_name)
+        instance.last_name = validated_data.get("last_name", instance.last_name)
+
+        password = validated_data.get("password", None)
+        if password:
+            instance.set_password(password)
+
+        if "is_staff" in validated_data:
+            if self.context["request"].user.is_staff:
+                instance.is_staff = validated_data["is_staff"]
+            else:
+                raise serializers.ValidationError(
+                    "Only staff users can update the staff status."
+                )
+
+        instance.save()
+        return instance

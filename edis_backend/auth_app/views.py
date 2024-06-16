@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.exceptions import PermissionDenied
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
@@ -257,3 +259,22 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
                 {"success": False, "error": error_dict},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class UserUpdateView(generics.RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get_object(self):
+        user = self.request.user
+        try:
+            obj = User.objects.get(pk=self.kwargs["pk"])
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User not found.")
+
+        if user.is_staff or obj == user:
+            return obj
+        else:
+            raise PermissionDenied("You do not have permission to perform this action.")
