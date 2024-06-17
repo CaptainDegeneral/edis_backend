@@ -278,3 +278,20 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
             return obj
         else:
             raise PermissionDenied("You do not have permission to perform this action.")
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        updated_user = {
+            "id": instance.id,
+            "email": instance.email,
+            "first_name": instance.first_name,
+            "last_name": instance.last_name,
+            "is_staff": instance.is_staff,
+        }
+
+        return Response(updated_user, status=status.HTTP_200_OK)

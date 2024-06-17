@@ -259,4 +259,12 @@ class UserUpdateSerializer(serializers.ModelSerializer):
                 )
 
         instance.save()
-        return instance
+
+        updated_user = {
+            "id": instance.id,
+            "email": instance.email,
+            "first_name": instance.first_name,
+            "last_name": instance.last_name,
+            "is_staff": instance.is_staff,
+        }
+        return updated_user
