@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import *
 
 
-class CourseSerializer(serializers.ModelSerializer):
+class CourseSerializerWithUser(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
 
     class Meta:

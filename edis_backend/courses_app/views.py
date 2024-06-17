@@ -5,13 +5,13 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Course
-from .serializers import CourseSerializer
+from .serializers import *
 from .permissions import IsAuthorOrStaff
 
 
 class CourseListCreateView(generics.ListCreateAPIView):
     queryset = Course.objects.all()
-    serializer_class = CourseSerializer
+    serializer_class = CourseSerializerWithUser
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ["user", "start_date", "end_date"]
@@ -34,7 +34,7 @@ class CourseListCreateView(generics.ListCreateAPIView):
 
 class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Course.objects.all()
-    serializer_class = CourseSerializer
+    serializer_class = CourseSerializerWithUser
     permission_classes = [IsAuthenticated, IsAuthorOrStaff]
 
     def get_queryset(self):
