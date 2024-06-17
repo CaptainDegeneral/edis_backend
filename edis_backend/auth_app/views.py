@@ -1,6 +1,6 @@
 from rest_framework import generics, status, views, permissions
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import PermissionDenied
@@ -295,3 +295,30 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
         }
 
         return Response(updated_user, status=status.HTTP_200_OK)
+
+
+class UserListView(generics.ListAPIView):
+    serializer_class = UserListSerializer
+    permission_classes = [
+        permissions.IsAuthenticated,
+        permissions.IsAdminUser,
+    ]
+
+    def get_queryset(self):
+        return User.objects.exclude(pk=self.request.user.pk)
+
+
+class UserDetailView(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserDetailSerializer
+    permission_classes = [
+        permissions.IsAuthenticated,
+        permissions.IsAdminUser,
+    ]
+
+    def get_object(self):
+        try:
+            user = User.objects.get(pk=self.kwargs["pk"])
+        except User.DoesNotExist:
+            raise NotFound("User not found.")
+        return user

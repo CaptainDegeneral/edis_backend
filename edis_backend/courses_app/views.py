@@ -1,37 +1,5 @@
-# from rest_framework import viewsets, filters, status
-# from django_filters.rest_framework import DjangoFilterBackend
-# from rest_framework.response import Response
-# from rest_framework.permissions import IsAuthenticated
-# from rest_framework.decorators import action
-
-# from .models import Course
-# from .serializers import CourseSerializer
-# from .permissions import IsAuthorOrStaff
-
-
-# class CourseViewSet(viewsets.ModelViewSet):
-#     queryset = Course.objects.all()
-#     serializer_class = CourseSerializer
-#     permission_classes = [IsAuthenticated, IsAuthorOrStaff]
-#     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-#     filterset_fields = ["user", "start_date", "end_date"]
-#     ordering_fields = ["start_date", "end_date"]
-
-#     def get_queryset(self):
-#         user = self.request.user
-#         if user.is_staff:
-#             return Course.objects.all()
-#         return Course.objects.filter(user=user)
-
-#     def perform_create(self, serializer):
-#         serializer.save(user=self.request.user)
-
-#     @action(detail=True, methods=["delete"])
-#     def destroy(self, request, *args, **kwargs):
-#         response = {"detail": "Удаление курсов запрещено."}
-#         return Response(response, status=status.HTTP_403_FORBIDDEN)
-
-from rest_framework import generics, status, filters
+from rest_framework import generics, status, filters, permissions
+from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -83,3 +51,20 @@ class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
         context = super().get_serializer_context()
         context.update({"request": self.request})
         return context
+
+
+class UserCoursesView(generics.ListAPIView):
+    serializer_class = CourseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if "user_id" in self.kwargs:
+            if not user.is_staff and user.id != int(self.kwargs["user_id"]):
+                raise PermissionDenied(
+                    "You do not have permission to access these courses."
+                )
+            queryset = Course.objects.filter(user_id=self.kwargs["user_id"])
+        else:
+            queryset = Course.objects.filter(user=user)
+        return queryset

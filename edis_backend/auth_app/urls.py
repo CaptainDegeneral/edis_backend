@@ -23,5 +23,7 @@ urlpatterns = [
         SetNewPasswordAPIView.as_view(),
         name="password-reset-complete",
     ),
-    path("user-update/<int:pk>", UserUpdateView.as_view(), name="user-update"),
+    path("users/", UserListView.as_view(), name="user-list"),
+    path("users/<int:pk>", UserDetailView.as_view(), name="user-detail"),
+    path("users/update/<int:pk>", UserUpdateView.as_view(), name="user-update"),
 ]
