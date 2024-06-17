@@ -15,6 +15,8 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 
+from courses_app.models import Course
+
 from .models import *
 from .utils import *
 
@@ -271,14 +273,29 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
 
 class UserListSerializer(serializers.ModelSerializer):
+    pp = serializers.SerializerMethodField()
+    pk = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ("id", "email", "first_name", "last_name", "is_staff")
+        fields = (
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "is_staff",
+            "pp",
+            "pk",
+        )
+
+    def get_pp(self, obj):
+        return Course.objects.filter(user=obj, course_type="ПП").count()
+
+    def get_pk(self, obj):
+        return Course.objects.filter(user=obj, course_type="ПК").count()
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "email", "first_name", "last_name", "is_staff")
-
-        
