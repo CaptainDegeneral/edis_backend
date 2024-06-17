@@ -5,6 +5,7 @@ from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django_filters.rest_framework import DjangoFilterBackend
 
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
@@ -23,6 +24,7 @@ import os
 from .serializers import *
 from .models import *
 from .utils import *
+from .filters import *
 
 from dotenv import load_dotenv
 
@@ -303,6 +305,8 @@ class UserListView(generics.ListAPIView):
         permissions.IsAuthenticated,
         permissions.IsAdminUser,
     ]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserFilter
 
     def get_queryset(self):
         return User.objects.exclude(pk=self.request.user.pk)
