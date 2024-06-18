@@ -273,7 +273,12 @@ class UserUpdateSerializer(serializers.ModelSerializer):
                 )
 
         if "is_verified" in validated_data:
-            instance.is_verified = validated_data["is_verified"]
+            if self.context["request"].user.is_staff:
+                instance.is_verified = validated_data["is_verified"]
+            else:
+                raise serializers.ValidationError(
+                    "Only staff users can update verification status."
+                )
 
         instance.save()
 
