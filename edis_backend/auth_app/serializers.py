@@ -226,16 +226,28 @@ class SignOutSerializer(serializers.Serializer):
             self.fail("invalid_token")
 
 
+from rest_framework import serializers
+from .models import User
+
+
 class UserUpdateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
     password = serializers.CharField(write_only=True, required=False)
     is_staff = serializers.BooleanField(required=False)
+    is_verified = serializers.BooleanField(required=False)  # Добавлено поле is_verified
 
     class Meta:
         model = User
-        fields = ("email", "first_name", "last_name", "password", "is_staff")
+        fields = (
+            "email",
+            "first_name",
+            "last_name",
+            "password",
+            "is_staff",
+            "is_verified",
+        )  # Включено поле is_verified
 
     def validate_email(self, value):
         user = self.context["request"].user
@@ -260,6 +272,9 @@ class UserUpdateSerializer(serializers.ModelSerializer):
                     "Only staff users can update the staff status."
                 )
 
+        if "is_verified" in validated_data:
+            instance.is_verified = validated_data["is_verified"]
+
         instance.save()
 
         updated_user = {
@@ -268,6 +283,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "first_name": instance.first_name,
             "last_name": instance.last_name,
             "is_staff": instance.is_staff,
+            "is_verified": instance.is_verified,
         }
         return updated_user
 
