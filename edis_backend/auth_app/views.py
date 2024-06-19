@@ -294,6 +294,7 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
             "first_name": instance.first_name,
             "last_name": instance.last_name,
             "is_staff": instance.is_staff,
+            "is_verified": instance.is_verified,
         }
 
         return Response(updated_user, status=status.HTTP_200_OK)
@@ -326,3 +327,19 @@ class UserDetailView(generics.RetrieveAPIView):
         except User.DoesNotExist:
             raise NotFound("User not found.")
         return user
+
+
+class UserCreateView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserCreateSerializer
+    permission_classes = [
+        permissions.IsAuthenticated,
+        permissions.IsAdminUser,
+    ]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        response_serializer = UserResponseSerializer(user)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)

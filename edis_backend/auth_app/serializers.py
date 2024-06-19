@@ -236,23 +236,24 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(required=True)
     password = serializers.CharField(write_only=True, required=False)
     is_staff = serializers.BooleanField(required=False)
-    is_verified = serializers.BooleanField(required=False)  # Добавлено поле is_verified
+    is_verified = serializers.BooleanField(required=False)
 
     class Meta:
         model = User
         fields = (
+            "id",  # Включаем id в поля сериализатора
             "email",
             "first_name",
             "last_name",
             "password",
             "is_staff",
             "is_verified",
-        )  # Включено поле is_verified
+        )
 
     def validate_email(self, value):
-        user = self.context["request"].user
+        user = self.instance  # Используем текущий экземпляр модели
         if User.objects.exclude(pk=user.pk).filter(email=value).exists():
-            raise serializers.ValidationError("This email is already in use.")
+            raise serializers.ValidationError("Этот email уже используется.")
         return value
 
     def update(self, instance, validated_data):
@@ -269,7 +270,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
                 instance.is_staff = validated_data["is_staff"]
             else:
                 raise serializers.ValidationError(
-                    "Only staff users can update the staff status."
+                    "Только персонал может обновлять статус персонала."
                 )
 
         if "is_verified" in validated_data:
@@ -277,7 +278,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
                 instance.is_verified = validated_data["is_verified"]
             else:
                 raise serializers.ValidationError(
-                    "Only staff users can update verification status."
+                    "Только персонал может обновлять статус проверки."
                 )
 
         instance.save()
@@ -321,3 +322,33 @@ class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "email", "first_name", "last_name", "is_staff", "is_verified")
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "email", "password", "is_staff")
+        extra_kwargs = {"password": {"write_only": True}}
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Этот email уже используется.")
+        return value
+
+    def create(self, validated_data):
+        user = User.objects.create(
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
+            email=validated_data["email"],
+            is_staff=validated_data.get("is_staff", False),
+            is_verified=True,
+        )
+        user.set_password(validated_data["password"])
+        user.save()
+        return user
+
+
+class UserResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "last_name", "first_name", "email", "is_staff", "is_verified")
