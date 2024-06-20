@@ -226,10 +226,6 @@ class SignOutSerializer(serializers.Serializer):
             self.fail("invalid_token")
 
 
-from rest_framework import serializers
-from .models import User
-
-
 class UserUpdateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     first_name = serializers.CharField(required=True)
@@ -241,7 +237,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "id",  # Включаем id в поля сериализатора
+            "id",
             "email",
             "first_name",
             "last_name",
@@ -251,7 +247,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         )
 
     def validate_email(self, value):
-        user = self.instance  # Используем текущий экземпляр модели
+        user = self.instance
         if User.objects.exclude(pk=user.pk).filter(email=value).exists():
             raise serializers.ValidationError("Этот email уже используется.")
         return value

@@ -56,6 +56,7 @@ class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
 class UserCoursesView(generics.ListAPIView):
     serializer_class = CourseSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         user = self.request.user
