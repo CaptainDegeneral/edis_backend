@@ -65,7 +65,9 @@ class UserCoursesView(generics.ListAPIView):
                 raise PermissionDenied(
                     "You do not have permission to access these courses."
                 )
-            queryset = Course.objects.filter(user_id=self.kwargs["user_id"])
+            queryset = Course.objects.filter(user_id=self.kwargs["user_id"]).order_by(
+                "-start_date"
+            )
         else:
-            queryset = Course.objects.filter(user=user)
+            queryset = Course.objects.filter(user=user).order_by("-start_date")
         return queryset
