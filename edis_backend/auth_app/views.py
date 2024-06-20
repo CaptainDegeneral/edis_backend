@@ -310,7 +310,9 @@ class UserListView(generics.ListAPIView):
     filterset_class = UserFilter
 
     def get_queryset(self):
-        return User.objects.exclude(pk=self.request.user.pk)
+        return User.objects.exclude(pk=self.request.user.pk).order_by(
+            "first_name", "last_name"
+        )
 
 
 class UserDetailView(generics.RetrieveAPIView):
