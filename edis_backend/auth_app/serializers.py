@@ -15,7 +15,7 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 
-from courses_app.models import Course
+from courses_app.models import DPO
 
 from .models import *
 from .utils import *
@@ -308,10 +308,10 @@ class UserListSerializer(serializers.ModelSerializer):
         )
 
     def get_pp(self, obj):
-        return Course.objects.filter(user=obj, course_type="ПП").count()
+        return DPO.objects.filter(user=obj, DPO_type="ПП").count()
 
     def get_pk(self, obj):
-        return Course.objects.filter(user=obj, course_type="ПК").count()
+        return DPO.objects.filter(user=obj, DPO_type="ПК").count()
 
 
 class UserDetailSerializer(serializers.ModelSerializer):

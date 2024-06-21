@@ -5,22 +5,31 @@ from .models import *
 
 class CourseSerializerWithUser(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
+    cycle_commission = serializers.CharField(
+        max_length=100, allow_blank=True, required=True
+    )
+    qualification = serializers.CharField(
+        max_length=100, allow_blank=True, required=False
+    )
 
     class Meta:
-        model = Course
+        model = DPO
         fields = [
             "id",
-            "course_type",
-            "course_name",
-            "institution",
-            "city",
+            "type_of_education",
             "start_date",
             "end_date",
-            "hours",
-            "document_type",
-            "document_number",
+            "training_period",
+            "program_name",
+            "training_place",
+            "city",
+            "certificate_number",
             "registration_number",
             "issue_date",
+            "hours",
+            "cycle_commission",
+            "qualification",
+            "document_type",
             "user",
         ]
 
@@ -40,10 +49,14 @@ class CourseSerializerWithUser(serializers.ModelSerializer):
         request = self.context.get("request")
         if request and not request.user.is_staff:
             representation.pop("user", None)
+        representation["cycle_commission"] = instance.cycle_commission
+        representation["qualification"] = (
+            instance.qualification if instance.qualification else None
+        )
         return representation
 
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Course
+        model = DPO
         fields = "__all__"

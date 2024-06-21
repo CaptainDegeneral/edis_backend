@@ -4,24 +4,23 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Course
+from .models import *
 from .serializers import *
 from .permissions import IsAuthorOrStaff
 
 
 class CourseListCreateView(generics.ListCreateAPIView):
-    queryset = Course.objects.all()
     serializer_class = CourseSerializerWithUser
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ["user", "start_date", "end_date"]
-    ordering_fields = ["start_date", "end_date"]
+    ordering_fields = ["start_date", "end_date", "user__last_name"]
 
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
-            return Course.objects.all()
-        return Course.objects.filter(user=user)
+            return DPO.objects.all().order_by("user__last_name", "user__first_name")
+        return DPO.objects.filter(user=user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -33,15 +32,14 @@ class CourseListCreateView(generics.ListCreateAPIView):
 
 
 class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Course.objects.all()
     serializer_class = CourseSerializerWithUser
     permission_classes = [IsAuthenticated, IsAuthorOrStaff]
 
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
-            return Course.objects.all()
-        return Course.objects.filter(user=user)
+            return DPO.objects.all()
+        return DPO.objects.filter(user=user)
 
     def destroy(self, request, *args, **kwargs):
         response = {"detail": "Удаление курсов запрещено."}
@@ -65,9 +63,9 @@ class UserCoursesView(generics.ListAPIView):
                 raise PermissionDenied(
                     "You do not have permission to access these courses."
                 )
-            queryset = Course.objects.filter(user_id=self.kwargs["user_id"]).order_by(
+            queryset = DPO.objects.filter(user_id=self.kwargs["user_id"]).order_by(
                 "-start_date"
             )
         else:
-            queryset = Course.objects.filter(user=user).order_by("-start_date")
+            queryset = DPO.objects.filter(user=user).order_by("-start_date")
         return queryset
