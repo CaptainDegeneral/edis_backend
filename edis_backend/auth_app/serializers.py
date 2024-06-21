@@ -308,10 +308,10 @@ class UserListSerializer(serializers.ModelSerializer):
         )
 
     def get_pp(self, obj):
-        return DPO.objects.filter(user=obj, DPO_type="ПП").count()
+        return DPO.objects.filter(user=obj, type_of_education="ПП").count()
 
     def get_pk(self, obj):
-        return DPO.objects.filter(user=obj, DPO_type="ПК").count()
+        return DPO.objects.filter(user=obj, type_of_education="ПК").count()
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
