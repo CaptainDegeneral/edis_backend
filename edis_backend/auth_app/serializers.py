@@ -293,6 +293,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 class UserListSerializer(serializers.ModelSerializer):
     pp = serializers.SerializerMethodField()
     pk = serializers.SerializerMethodField()
+    up = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -305,6 +306,7 @@ class UserListSerializer(serializers.ModelSerializer):
             "is_verified",
             "pp",
             "pk",
+            "up",
         )
 
     def get_pp(self, obj):
@@ -312,6 +314,9 @@ class UserListSerializer(serializers.ModelSerializer):
 
     def get_pk(self, obj):
         return DPO.objects.filter(user=obj, type_of_education="ПК").count()
+
+    def get_up(self, obj):
+        return DPO.objects.filter(user=obj, processed=False).count()
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
