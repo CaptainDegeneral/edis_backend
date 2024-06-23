@@ -316,7 +316,7 @@ class UserListSerializer(serializers.ModelSerializer):
         return DPO.objects.filter(user=obj, type_of_education="ПК").count()
 
     def get_up(self, obj):
-        return DPO.objects.filter(user=obj, processed=False).count()
+        return obj.unprocessed_count
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
