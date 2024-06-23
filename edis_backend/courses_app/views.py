@@ -2,7 +2,7 @@ from rest_framework import generics, status, filters, permissions
 from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from .models import *
 from .serializers import *
@@ -64,8 +64,23 @@ class UserCoursesView(generics.ListAPIView):
                     "You do not have permission to access these courses."
                 )
             queryset = DPO.objects.filter(user_id=self.kwargs["user_id"]).order_by(
-                "-start_date"
+                "is_processed", "-start_date"
             )
         else:
-            queryset = DPO.objects.filter(user=user).order_by("-start_date")
+            queryset = DPO.objects.filter(user=user).order_by(
+                "is_processed", "-start_date"
+            )
         return queryset
+
+
+class UpdateProcessedView(generics.UpdateAPIView):
+    queryset = DPO.objects.all()
+    serializer_class = DPOProcessedSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_processed = not instance.is_processed
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)

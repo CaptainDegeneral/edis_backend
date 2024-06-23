@@ -11,6 +11,7 @@ class CourseSerializerWithUser(serializers.ModelSerializer):
     qualification = serializers.CharField(
         max_length=100, allow_blank=True, required=False
     )
+    formatted_course_info = serializers.SerializerMethodField()
 
     class Meta:
         model = DPO
@@ -31,6 +32,8 @@ class CourseSerializerWithUser(serializers.ModelSerializer):
             "qualification",
             "document_type",
             "user",
+            "formatted_course_info",
+            "is_processed",
         ]
 
     def get_user(self, obj):
@@ -43,6 +46,9 @@ class CourseSerializerWithUser(serializers.ModelSerializer):
                 "last_name": obj.user.last_name,
             }
         return None
+
+    def get_formatted_course_info(self, obj):
+        return obj.formatted_course_info()
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -57,6 +63,17 @@ class CourseSerializerWithUser(serializers.ModelSerializer):
 
 
 class CourseSerializer(serializers.ModelSerializer):
+    formatted_course_info = serializers.SerializerMethodField()
+
     class Meta:
         model = DPO
         fields = "__all__"
+
+    def get_formatted_course_info(self, obj):
+        return obj.formatted_course_info()
+
+
+class DPOProcessedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DPO
+        fields = ["is_processed"]

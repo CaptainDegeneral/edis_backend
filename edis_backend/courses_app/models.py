@@ -42,6 +42,7 @@ class DPO(models.Model):
         verbose_name="Тип выданного документа",
         editable=False,
     )
+    is_processed = models.BooleanField(default=False, verbose_name="Обработано")
 
     class Meta:
         db_table = "DPO"
@@ -64,6 +65,17 @@ class DPO(models.Model):
             self.document_type = "Н"
 
         super().save(*args, **kwargs)
+
+    def formatted_course_info(self):
+        education_type = dict(self.EDUCATION_TYPES).get(self.type_of_education, "")
+        document_type = "Удостоверение" if self.document_type == "У" else "Диплом"
+        issue_date = self.issue_date.strftime("%d.%m.%Y") if self.issue_date else "N/A"
+        return (
+            f"{self.training_period}, Вид образования: {education_type}, Наименование курса: {self.program_name}, "
+            f"{self.hours} ч., Вид документа: {document_type}, Номер: {self.certificate_number}, "
+            f"Рег. номер: {self.registration_number}, Дата выдачи: {issue_date}, "
+            f"Выдан: {self.training_place}, г. {self.city}."
+        )
 
     def __str__(self):
         return f"{self.program_name} ({self.user.last_name} {self.user.first_name[0]}.)"
