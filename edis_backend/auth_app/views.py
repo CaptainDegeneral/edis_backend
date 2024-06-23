@@ -7,6 +7,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
 
+from django.db.models import Count, Q
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from django.conf import settings
@@ -310,8 +311,12 @@ class UserListView(generics.ListAPIView):
     filterset_class = UserFilter
 
     def get_queryset(self):
-        return User.objects.exclude(pk=self.request.user.pk).order_by(
-            "first_name", "last_name"
+        return (
+            User.objects.annotate(
+                unprocessed_count=Count("dpo", filter=Q(dpo__is_processed=False))
+            )
+            .exclude(pk=self.request.user.pk)
+            .order_by("-unprocessed_count", "first_name", "last_name")
         )
 
 
