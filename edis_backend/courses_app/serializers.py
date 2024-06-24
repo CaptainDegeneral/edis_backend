@@ -55,7 +55,9 @@ class CourseSerializerWithUser(serializers.ModelSerializer):
         request = self.context.get("request")
         if request and not request.user.is_staff:
             representation.pop("user", None)
-        representation["cycle_commission"] = instance.cycle_commission
+        representation["cycle_commission"] = (
+            instance.cycle_commission if instance.cycle_commission else None
+        )
         representation["qualification"] = (
             instance.qualification if instance.qualification else None
         )
